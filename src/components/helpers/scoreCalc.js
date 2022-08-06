@@ -14,6 +14,7 @@ let terminals = [0, 8, 9, 17, 18, 26];
 function isHand(hand) {
   let melds = [[], [], [], [], []];
     for (let tile of hand) {
+        
     }}
 
 function isOrphans(hand) {
