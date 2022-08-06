@@ -1,0 +1,37 @@
+[
+  [
+    "1 man",
+    "2 man",
+    "3 man",
+    "4 man",
+    "5 man",
+    "6 man",
+    "7 man",
+    "8 man",
+    "9 man"
+  ],
+  [
+    "1 pin",
+    "2 pin",
+    "3 pin",
+    "4 pin",
+    "5 pin",
+    "6 pin",
+    "7 pin",
+    "8 pin",
+    "9 pin"
+  ],
+  [
+    "1 sou",
+    "2 sou",
+    "3 sou",
+    "4 sou",
+    "5 sou",
+    "6 sou",
+    "7 sou",
+    "8 sou",
+    "9 sou"
+  ],
+
+  ["Haku", "Hatsu", "Chun", "East", "South", "West", "North"]
+]
