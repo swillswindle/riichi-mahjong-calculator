@@ -1,0 +1,227 @@
+   [
+    {
+        "suit": "man",
+        "value": 1,
+        "red 5" : false,
+        "terminal": true
+    },
+    {
+        "suit":"man",
+        "value": 2,
+        "red 5": false,
+        "terminal": false
+    },
+    {
+        "suit":"man",
+        "value":3,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":4,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":5,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":5,
+        "red 5":true,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":6,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":7,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":8,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"man",
+        "value":9,
+        "red 5":false,
+        "terminal":true
+    },
+
+    {
+        "suit":"pin",
+        "value":1,
+        "red 5":false,
+        "terminal":true
+    },
+    {
+        "suit":"pin",
+        "value":2,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":3,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":4,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":5,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":5,
+        "red 5":true,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":6,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":7,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":8,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"pin",
+        "value":9,
+        "red 5":false,
+        "terminal":true
+    },
+
+    {
+        "suit":"sou",
+        "value":1,
+        "red 5":false,
+        "terminal":true
+    },
+    {
+        "suit":"sou",
+        "value":2,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":3,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":4,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":5,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":5,
+        "red 5":true,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":6,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":7,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":8,
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"sou",
+        "value":9,
+        "red 5":false,
+        "terminal":true
+    },
+    {
+        "suit":"honor",
+        "value":"haku",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"hatsu",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"chun",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"east",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"south",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"west",
+        "red 5":false,
+        "terminal":false
+    },
+    {
+        "suit":"honor",
+        "value":"north",
+        "red 5":false,
+        "terminal":false
+    }
+
+]

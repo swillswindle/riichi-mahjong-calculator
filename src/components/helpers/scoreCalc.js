@@ -1,20 +1,20 @@
 // export function evaluateHand(hand) {
 //   // determine if hand is a valid hand fitting the basic structure or one of the special hands
 // }
-import tiles from "./tiles";
+let tiles = require("../../resources/tiles.json");
 console.log(tiles.length);
 let simples = [
-  1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 19, 21, 22, 23, 24, 25,
+  1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28,
 ];
-let honors = [27, 28, 29, 30, 31, 32, 33];
-let man = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-let pin = [9, 10, 11, 12, 13, 14, 15, 16, 17];
-let sou = [18, 19, 20, 21, 22, 23, 24, 25, 26];
-let terminals = [0, 8, 9, 17, 18, 26];
-let ones = [0, 9, 18]
-let nines = [8, 17, 26]
-let twos = [1, 10, 19];
-let eights = [7, 16, 25];
+let honors = [30, 31, 32, 33, 34, 35, 36];
+let man = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+let pin = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+let sou = [20, 21, 22, 23, 24, 25, 26, 27, 28, 29];
+let terminals = [0, 9, 10, 19, 20, 29];
+let ones = [0, 10, 20]
+let nines = [9, 19, 29]
+let twos = [1, 11, 21];
+let eights = [8, 18, 28];
 
 function isHand(hand) {
   let melds = [[], [], [], [], []];
