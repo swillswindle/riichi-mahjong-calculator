@@ -318,7 +318,10 @@ function isSevenPairs(hand) {
       console.log(possibleMelds);
     }
     if (possibleMelds.length >= 12) {
+      //i'm not 100% this is surefire but i think it works. ryanpeiko is is the only other yaku that can be made with seven pairs. 2 of the same sequence in the same suit, twice. 
+      //check the test hand if that's confusing.
       console.log(`Found a ryanpeiko`);
+    
       return "Ryanpeiko";
     }
     console.log(`Not a ryanpeiko`);
