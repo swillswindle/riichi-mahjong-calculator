@@ -128,7 +128,7 @@ function isRyanpeiko(currentHand) {
   console.log(`Not a ryanpeiko`);
   return false;
 }
-//find melds that can be made from a specific honor tile given the tiles in hand. if the hand is not thirteen orphans or seven pairs, then an honor tile must be used in either a pair, pon, or kan.
+//find melds that can be made from multiples of tiles in hand. if the hand is not thirteen orphans or seven pairs, then an honor tile must be used in either a pair, pon, or kan.
 function checkMultiples(currentHand, tile, currentMeld) {
   switch (currentHand.tiles.filter((x) => x === tile).length) {
     case 1:
