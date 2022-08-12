@@ -197,7 +197,6 @@ function checkChi(currentHand, tile, possibleChi) {
   ) {
     possibleChi.push([tile, tile - 1, tile + 1]);
   }
-  
 }
 //if possibleChi includes duplicates, remove them unless the hand contains more than one of each tile in the meld.
 //don't need to bother with pon/kan bc a hand cannot contain duplicate pon/kan.
@@ -226,7 +225,32 @@ function removeDupes(possibleChi, currentHand) {
     }
   }
 }
-
+//we've taken care of all tiles that only work in one meld, and created arrays containing all the possible melds for the remaining tiles.
+//now, we need to make sure that the remaining tiles can all be worked into valid melds.
+//if we can't make the rest of the tiles work, then we can toss this possible meld and move on to the next one.
+function reducePossibleMelds(
+  possibleChi,
+  possiblePon,
+  possibleKan,
+  currentHand
+) {
+  let possibleMelds = [...possibleChi, ...possiblePon, ...possibleKan];
+  for (let meld of possibleMelds) {
+    let remainingTiles = JSON.parse(JSON.stringify(currentHand.tiles));
+    remainingTiles.splice(remainingTiles.indexOf(meld[0]), 1);
+    remainingTiles.splice(remainingTiles.indexOf(meld[1]), 1);
+    remainingTiles.splice(remainingTiles.indexOf(meld[2]), 1);
+    remainingTiles.unshift(-1, -1, -1);
+    console.log(remainingTiles);
+    if (currentHand.pairCount === 1) {
+      //if we already know the pair then we only have to look for pon/kan/chi
+      //idr exactly how kan works scoring wise but it might be prudent to see if we can do something with kans similar to how we dealt with the red fives.
+    }
+    if (currentHand.pairCount === 0) {
+      //if we don't have a pair yet, the remaining tiles must contain a pair
+    }
+  }
+}
 function isHand(hand, dora) {
   //initialize hand object
   const currentHand = {
@@ -257,7 +281,7 @@ function isHand(hand, dora) {
 
   let currentMeld = 0;
   //go through all the tiles in hand and deal with just the honors.
-  
+
   for (let tile of currentHand.tiles) {
     if (honors.includes(tile)) {
       //honors can't be in a chi, so we only need to look for pairs/pon/kan which are all mutually exclusive.
@@ -291,7 +315,7 @@ function isHand(hand, dora) {
         }
         if (possibleChi.length === 1) {
           //if the tile only fits into one meld, that meld must be part of the hand.
-        //add those tiles to the current meld, then remove the tiles from the hand and increment currentMeld.
+          //add those tiles to the current meld, then remove the tiles from the hand and increment currentMeld.
           currentHand.melds[currentMeld].push(...possibleChi[0]);
           currentHand.tiles.splice(
             currentHand.tiles.indexOf(possibleChi[0][0]),
@@ -321,7 +345,7 @@ function isHand(hand, dora) {
 
           break;
         }
-        
+
         if (possibleChi.length > 1) {
           //if a tile fits into more than one meld, ignore it for now. we just want to identify all tiles that only fit into one meld.
           continue;
@@ -347,7 +371,6 @@ function isHand(hand, dora) {
             //if we already know the pair, and there's only one possible chi, then that chi must be one of the melds.
             //add it to the current meld, then remove the tiles from the hand and increment currentMeld.
             currentHand.melds[currentMeld].push(...possibleChi[0]);
-            
           }
         }
       case 3:
