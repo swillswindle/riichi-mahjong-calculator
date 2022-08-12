@@ -1,5 +1,6 @@
 //yaku reference https://en.wikipedia.org/wiki/Japanese_mahjong_yaku
 let tiles = require("../../resources/tiles.json");
+
 //organize tiles into categories to check the hand against
 let simples = [
   1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25,
@@ -16,19 +17,20 @@ let eights = [7, 16, 25];
 let redFives = [34, 35, 36];
 
 //example hands/dora for testing
-let testhand = [27, 27, 27, 0, 1, 2, 3, 4, 34, 6, 7, 8, 33, 33];
+let testhand = [27, 27, 27, 0, 1, 2, 3, 34, 5, 6, 7, 8, 33, 33];
 let testdora = [27, 3, 10];
 let sevenPairsTestHand = [1, 1, 10, 10, 19, 19, 28, 28, 3, 3, 12, 12, 21, 21];
 let ryanpeikoTestHand = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 30, 30];
+let badhand = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 0, 8];
 
 //additional scoring relevant variables (incorporate into currentHand object?)
 let prevailingWind = 30;
-let playerWind = 30;
+let seatWind = 30;
 let dealer = true;
-let tsumo = false;
 let ron = true;
 let openHand = false;
 let winningTile = 33;
+let riichi = false;
 
 //count dora in hand
 function countDora(currentHand, dora) {
@@ -57,17 +59,17 @@ function replaceFives(currentHand) {
     switch (tile) {
       case 34:
         currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
-        currentHand.tiles.push(4);
+        currentHand.tiles.unshift(4);
         currentHand.doraCount++;
         break;
       case 35:
         currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
-        currentHand.tiles.push(13);
+        currentHand.tiles.unshift(13);
         currentHand.doraCount++;
         break;
       case 36:
         currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
-        currentHand.tiles.push(22);
+        currentHand.tiles.unshift(22);
         currentHand.doraCount++;
         break;
       default:
@@ -76,7 +78,6 @@ function replaceFives(currentHand) {
   }
 }
 
-//check to see if hand is thirteen orphans
 function isOrphans(currentHand) {
   for (let tile of currentHand.tiles) {
     if (simples.includes(tile)) {
@@ -86,18 +87,17 @@ function isOrphans(currentHand) {
   return new Set(hand).size === 13;
 }
 
-//check to see if hand is seven pairs
-
 function isSevenPairs(currentHand) {
+  let tempHand = currentHand.tiles.slice();
   let pairCount = 0;
-  for (let tile of currentHand.tiles) {
+  for (let tile of tempHand) {
     if (tile === -1) {
       continue;
     }
-    if (hand.filter((x) => x === tile).length === 2) {
-      hand.splice(hand.indexOf(tile), 1);
-      hand.splice(hand.indexOf(tile), 1);
-      hand.unshift(-1, -1);
+    if (tempHand.filter((x) => x === tile).length === 2) {
+      tempHand.splice(tempHand.indexOf(tile), 1);
+      tempHand.splice(tempHand.indexOf(tile), 1);
+      tempHand.unshift(-1, -1);
       pairCount++;
     }
   }
@@ -128,8 +128,8 @@ function isRyanpeiko(currentHand) {
   console.log(`Not a ryanpeiko`);
   return false;
 }
-//find melds that can be made from multiples of tiles in hand. if the hand is not thirteen orphans or seven pairs, then an honor tile must be used in either a pair, pon, or kan.
-function checkMultiples(currentHand, tile, currentMeld) {
+//find melds that can be made from honors in hand. if the hand is not thirteen orphans or seven pairs, then an honor tile must be used in either a pair, pon, or kan.
+function checkHonors(currentHand, tile) {
   switch (currentHand.tiles.filter((x) => x === tile).length) {
     case 1:
       return false;
@@ -139,10 +139,10 @@ function checkMultiples(currentHand, tile, currentMeld) {
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
       currentHand.tiles.unshift(-1, -1);
       currentHand.pairCount++;
-      currentMeld--;
+      currentHand.currentMeld--;
       break;
     case 3:
-      currentHand.melds[currentMeld].push(tile, tile, tile);
+      currentHand.melds[currentHand.currentMeld].push(tile, tile, tile);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
@@ -150,7 +150,7 @@ function checkMultiples(currentHand, tile, currentMeld) {
       currentHand.ponCount++;
       break;
     case 4:
-      currentHand.melds[currentMeld].push(tile, tile, tile, tile);
+      currentHand.melds[currentHand.currentMeld].push(tile, tile, tile, tile);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
       currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
@@ -160,8 +160,10 @@ function checkMultiples(currentHand, tile, currentMeld) {
       break;
   }
   console.log(`Found a meld for honor tile: ${tiles[tile].value}
-  currentMeld: ${currentMeld} 
-  currentMeld content: ${currentHand.melds[currentMeld]} (if this is empty, it's a pair)
+  currentMeld: ${currentHand.currentMeld} 
+  currentMeld content: ${
+    currentHand.melds[currentHand.currentMeld]
+  } (if this is empty, it's a pair)
   all melds: ${currentHand.melds}
   pairCount: ${currentHand.pairCount}
   ponCount: ${currentHand.ponCount}
@@ -169,9 +171,9 @@ function checkMultiples(currentHand, tile, currentMeld) {
   chiCount: ${currentHand.chiCount}
   doraCount: ${currentHand.doraCount}
   incrementing currentMeld...`);
-  currentMeld++;
+  currentHand.currentMeld++;
 }
-//see what chi can be made from tiles in hand. and add those possibilites to the possibleChi array.
+//see what chi can be made from a given array of tiles and add those possibilites to the possibleChi array.
 function checkChi(currentHand, tile, possibleChi) {
   if (
     !nines.includes(tile) &&
@@ -187,7 +189,7 @@ function checkChi(currentHand, tile, possibleChi) {
     currentHand.tiles.includes(tile - 1) &&
     currentHand.tiles.includes(tile - 2)
   ) {
-    possibleChi.push([tile, tile - 1, tile - 2]);
+    possibleChi.push([tile - 2, tile - 1, tile]);
   }
   if (
     !ones.includes(tile) &&
@@ -195,10 +197,10 @@ function checkChi(currentHand, tile, possibleChi) {
     currentHand.tiles.includes(tile - 1) &&
     currentHand.tiles.includes(tile + 1)
   ) {
-    possibleChi.push([tile, tile - 1, tile + 1]);
+    possibleChi.push([tile - 1, tile, tile + 1]);
   }
 }
-//if possibleChi includes duplicates, remove them unless the hand contains more than one of each tile in the meld.
+//if possibleMelds includes duplicates, remove them unless the hand contains more than one of all tiles in the meld.
 //don't need to bother with that check for pon/kan bc a hand cannot contain duplicate pon/kan.
 function removeDupes(possibleMelds, currentHand) {
   if (possibleMelds.chi.length > 0) {
@@ -207,11 +209,7 @@ function removeDupes(possibleMelds, currentHand) {
         continue;
       }
       for (let i = 0, len = possibleMelds.chi.length; i < len; i++) {
-        if (
-          possibleMelds.chi[i].includes(meld[0]) &&
-          possibleMelds.chi[i].includes(meld[1]) &&
-          possibleMelds.chi[i].includes(meld[2])
-        ) {
+        if (possibleMelds.chi[i] === meld) {
           if (
             currentHand.tiles.filter((x) => x === meld[0]).length > 1 &&
             currentHand.tiles.filter((x) => x === meld[1]).length > 1 &&
@@ -226,6 +224,7 @@ function removeDupes(possibleMelds, currentHand) {
       }
     }
   }
+
   if (possibleMelds.pon.length > 0) {
     for (let meld of possibleMelds.pon) {
       if (meld.includes(-1)) {
@@ -252,8 +251,8 @@ function removeDupes(possibleMelds, currentHand) {
       }
     }
   }
-  if (possibleMelds.pair.length > 0) {
-    for (let meld of possibleMelds.kan) {
+  if (possibleMelds.pairs.length > 0) {
+    for (let meld of possibleMelds.pairs) {
       if (meld.includes(-1)) {
         continue;
       }
@@ -302,7 +301,8 @@ function reducePossibleMelds(possibleMelds, currentHand) {
   }
 }
 
-function reduceHand(currentHand, possibleMelds, currentMeld) {
+function reduceHand(currentHand, possibleMelds) {
+  let unsortedCount = currentHand.tiles.filter((x) => x !== -1).length;
   for (let tile of currentHand.tiles) {
     let possibleChi = [];
 
@@ -333,13 +333,17 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
             1
           );
           currentHand.tiles.unshift(-1, -1, -1);
-          currentHand.melds[currentMeld].push(...possibleChi.pop());
+          currentHand.melds[currentHand.currentMeld].push(
+            possibleChi[0][0],
+            possibleChi[0][1],
+            possibleChi[0][2]
+          );
           currentHand.chiCount++;
 
           console.log(`Found a Chi!
             tile: ${tiles[tile].value} ${tiles[tile].suit}
-            currentMeld: ${currentMeld}
-            currentMeld content: ${currentHand.melds[currentMeld]}
+            currentMeld: ${currentHand.currentMeld}
+            currentMeld content: ${currentHand.melds[currentHand.currentMeld]}
             all melds: ${currentHand.melds}
             pairCount: ${currentHand.pairCount}
             ponCount: ${currentHand.ponCount}
@@ -347,13 +351,13 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
             chiCount: ${currentHand.chiCount}
             doraCount: ${currentHand.doraCount}
             incrementing current meld...`);
-          currentMeld++;
+          currentHand.currentMeld++;
           break;
         }
 
         if (possibleChi.length > 1) {
           //if a tile fits into more than one meld, don't do anything other than adding those melds to possibleMelds obj. for now, we just want to identify all tiles that only fit into one meld.
-          possibleMelds.chi.push(possibleChi);
+          possibleMelds.chi.push(...possibleChi);
           break;
         }
 
@@ -374,7 +378,7 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
 
           console.log(`Found a pair! 
           tile: ${tiles[tile].value} ${tiles[tile].suit}
-          currentMeld: ${currentMeld} 
+          currentMeld: ${currentHand.currentMeld} 
           meld pair content: ${currentHand.melds[4]}
           all melds: ${currentHand.melds}
           pairCount: ${currentHand.pairCount}
@@ -401,12 +405,14 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
               1
             );
             currentHand.tiles.unshift(-1, -1, -1);
-            currentHand.melds[currentMeld].push(...possibleChi.pop());
+            currentHand.melds[currentHand.currentMeld].push(
+              ...possibleChi.pop()
+            );
             currentHand.chiCount++;
             console.log(`Found a Chi!
             tile: ${tiles[tile].value} ${tiles[tile].suit}
-            currentMeld: ${currentMeld}
-            currentMeld content: ${currentHand.melds[currentMeld]}
+            currentMeld: ${currentHand.currentMeld}
+            currentMeld content: ${currentHand.melds[currentHand.currentMeld]}
             all melds: ${currentHand.melds}
             pairCount: ${currentHand.pairCount}
             ponCount: ${currentHand.ponCount}
@@ -414,10 +420,10 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
             chiCount: ${currentHand.chiCount}
             doraCount: ${currentHand.doraCount}
             incrementing current meld...`);
-            currentMeld++;
+            currentHand.currentMeld++;
           } else {
             //if we don't know the pair, add both melds to possibleMelds and continue.
-            possibleMelds.chi.push(possibleChi);
+            possibleMelds.chi.push(...possibleChi);
             possibleMelds.pairs.push([tile, tile]);
           }
           break;
@@ -425,10 +431,10 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
         if (possibleChi.length > 1) {
           if (currentHand.pairCount === 1) {
             //if we already know the pair, and there's more than one possible chi, then the tile must belong to one of those chi. keep sorting the rest of the tiles.
-            possibleMelds.chi.push(possibleChi);
+            possibleMelds.chi.push([possibleChi]);
             break;
           } else {
-            possibleMelds.chi.push(possibleChi);
+            possibleMelds.chi.push(...possibleChi);
             possibleMelds.pairs.push([tile, tile]);
             break;
           }
@@ -440,7 +446,7 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
         if (possibleChi.length === 0) {
           //if we have three of a given tile, and that tile does not fit into a chi, it must be a pon.
           //add the pon to the current meld and remove the tiles from the hand.
-          currentHand.melds[currentMeld].push(tile, tile, tile);
+          currentHand.melds[currentHand.currentMeld].push(tile, tile, tile);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
@@ -449,8 +455,8 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
 
           console.log(`Found a pon!
           tile: ${tiles[tile].value} ${tiles[tile].suit}
-          currentMeld: ${currentMeld}
-          currentMeld content: ${currentHand.melds[currentMeld]}
+          currentMeld: ${currentHand.currentMeld}
+          currentMeld content: ${currentHand.melds[currentHand.currentMeld]}
           all melds: ${currentHand.melds}
           pairCount: ${currentHand.pairCount}
           ponCount: ${currentHand.ponCount}
@@ -458,11 +464,11 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
           chiCount: ${currentHand.chiCount}
           doraCount: ${currentHand.doraCount}
           incrementing current meld...`);
-          currentMeld++;
+          currentHand.currentMeld++;
           break;
         }
         if (possibleChi.length > 0) {
-          possibleMelds.chi.push(possibleChi);
+          possibleMelds.chi.push(...possibleChi);
           possibleMelds.pon.push([tile, tile, tile]);
           break;
         }
@@ -470,14 +476,31 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
         checkChi(currentHand, tile, possibleChi);
         //if we have four of a given tile, and that tile wouldn't fit into any chi, it must be a kan.
         if (possibleChi.length === 0) {
-          currentHand.melds[currentMeld].push(tile, tile, tile, tile);
+          currentHand.melds[currentHand.currentMeld].push(
+            tile,
+            tile,
+            tile,
+            tile
+          );
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.splice(currentHand.tiles.indexOf(tile), 1);
           currentHand.tiles.unshift(-1, -1, -1, -1);
           currentHand.kanCount++;
-          currentMeld++;
+          console.log(`Found a Kan!
+          tile: ${tiles[tile].value} ${tiles[tile].suit}
+          currentMeld: ${currentHand.currentMeld}
+          currentMeld content: ${currentHand.melds[currentHand.currentMeld]}
+          all melds: ${currentHand.melds}
+          pairCount: ${currentHand.pairCount}
+          ponCount: ${currentHand.ponCount}
+          kanCount: ${currentHand.kanCount}
+          chiCount: ${currentHand.chiCount}
+          doraCount: ${currentHand.doraCount}
+          incrementing current meld...`);
+
+          currentHand.currentMeld++;
           break;
         }
         if (possibleChi.length > 0) {
@@ -488,6 +511,16 @@ function reduceHand(currentHand, possibleMelds, currentMeld) {
 
       default:
         return false;
+    }
+
+    if (currentHand.tiles.filter((x) => x !== -1).length === 0) {
+      return 0;
+    }
+    if (unsortedCount > currentHand.tiles.filter((x) => x !== -1).length) {
+      return 1;
+    }
+    if (unsortedCount === currentHand.tiles.filter((x) => x !== -1).length) {
+      return 2;
     }
   }
 }
@@ -502,12 +535,18 @@ function isHand(hand, dora) {
     chiCount: 0,
     doraCount: 0,
     melds: [[], [], [], [], []],
+    currentMeld: 0,
+    han: 0,
+    fu: 0,
   };
 
   //populate tiles property with user input, swap out red fives, and count dora.
   currentHand.tiles = JSON.parse(JSON.stringify(hand));
   replaceFives(currentHand);
   countDora(currentHand, dora);
+  //sort tiles by index from low to high
+  currentHand.tiles.sort((a, b) => a - b);
+  //sort tiles by value from low to high
 
   //quick checks for unusual hands
   if (isOrphans(currentHand) && !openHand) {
@@ -520,13 +559,12 @@ function isHand(hand, dora) {
     return "Seven Pairs";
   }
 
-  let currentMeld = 0;
   //go through all the tiles in hand and deal with just the honors.
-
   for (let tile of currentHand.tiles) {
     if (honors.includes(tile)) {
       //honors can't be in a chi, so we only need to look for pairs/pon/kan which are all mutually exclusive.
-      checkMultiples(currentHand, tile, currentMeld);
+      //if we find any of those, we can lock them in right away.
+      checkHonors(currentHand, tile);
     } else {
       continue;
     }
@@ -539,62 +577,53 @@ function isHand(hand, dora) {
 
   //now that honors are dealt with, loop through the remaining tiles and see what melds are possible.
   //if a given meld is the only possible meld for a given tile, we can add those tiles to the current meld and remove them from the hand.
-
   let possibleMelds = {
     chi: [],
     pon: [],
     kan: [],
     pairs: [],
   };
+  let result = reduceHand(currentHand, possibleMelds);
+  removeDupes(possibleMelds, currentHand);
 
-  reduceHand(currentHand, possibleMelds, currentMeld);
-  //once we've iterated through all the tiles, we can run the loop again to see if any of the remaining tiles in hand only have one possible meld now that we've filtered some tiles out.
-  //if currentHand.tiles contains only -1s, then we've found all the melds.
-  let unsortedTiles = currentHand.tiles.filter((tile) => tile !== -1).length;
-  if (unsortedTiles === 0) {
+  while (result === 1) {
+    //if reduceHand returns 1, we successfully reduced the hand, and should keep trying until there are no more tiles or we can't reduce any further.
+    result = reduceHand(currentHand, possibleMelds);
+    removeDupes(possibleMelds, currentHand);
+  }
+  if (result === 0) {
+    //if reduceHand returns 0, the hand should be good to go.
+    console.log(`We got ourselves a hand baby:
+    meld one:
+    ${tiles[currentHand.melds[0][0]].value + " " + tiles[currentHand.melds[0][0]].suit}, ${tiles[currentHand.melds[0][1]].value + " " + tiles[currentHand.melds[0][1]].suit}, ${tiles[currentHand.melds[0][2]].value + " " + tiles[currentHand.melds[0][2]].suit} 
+    meld two:
+    ${tiles[currentHand.melds[1][0]].value + " " + tiles[currentHand.melds[1][0]].suit}, ${tiles[currentHand.melds[1][1]].value + " " + tiles[currentHand.melds[1][1]].suit}, ${tiles[currentHand.melds[1][2]].value + " " + tiles[currentHand.melds[1][2]].suit}
+    meld three:
+    ${tiles[currentHand.melds[2][0]].value + " " + tiles[currentHand.melds[2][0]].suit}, ${tiles[currentHand.melds[2][1]].value + " " + tiles[currentHand.melds[2][1]].suit}, ${tiles[currentHand.melds[2][2]].value + " " + tiles[currentHand.melds[2][2]].suit}
+    meld four:
+    ${tiles[currentHand.melds[3][0]].value + " " + tiles[currentHand.melds[3][0]].suit}, ${tiles[currentHand.melds[3][1]].value + " " + tiles[currentHand.melds[3][1]].suit}, ${tiles[currentHand.melds[3][2]].value + " " + tiles[currentHand.melds[3][2]].suit}
+    and the pair:
+    ${tiles[currentHand.melds[4][0]].value + " " + tiles[currentHand.melds[4][0]].suit}, ${tiles[currentHand.melds[4][1]].value + " " + tiles[currentHand.melds[4][1]].suit}
+    `);
     return currentHand;
   }
-  if (
-    unsortedTiles === currentHand.tiles.filter((tile) => tile !== -1).length
-  ) {
-    console.log(`Unable to reduce hand any further.`);
-    //if the reducer can't find all the melds, then we call the possibleMeld reducer.
-  } else {
+  if (result === 2) {
+    //if reduceHand returns 2, we couldn't reduce the hand any further, and we now need to call reducePossibleMelds to try to narrow down the possibliities.
+    //we can try to simplify things a little more before we do though.
+    if (currentHand.pairCount === 0 && possibleMelds.pairs.length === 1) {
+      currentHand.tiles.splice(
+        currentHand.tiles.indexOf(possibleMelds.pairs[0][0]),
+        1
+      );
+      currentHand.tiles.splice(
+        currentHand.tiles.indexOf(possibleMelds.pairs[0][1]),
+        1
+      );
+      currentHand.tiles.unshift(-1, -1);
+      currentHand.melds[4].push(...possibleMelds.pairs.pop());
+      currentHand.pairCount++;
+    }
   }
 }
 
-let badhand = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 0, 8];
-
-class Yaku {
-  execute(yakuFunction) {
-    yakuFunction();
-  }
-}
-
-class Orphans extends Yaku {
-  execute() {
-    super.execute(() => {
-      console.log("Orphans");
-    });
-  }
-}
-class SevenPairs extends Yaku {
-  execute() {
-    super.execute(() => {
-      console.log("Seven Pairs");
-    });
-  }
-}
-class AllTerminals extends Yaku {
-  execute() {
-    super.execute(() => {
-      console.log("All Terminals");
-    });
-  }
-}
-
-let test = new AllTerminals();
-test.execute();
-// isSevenPairs(sevenPairsTestHand);
-// isSevenPairs(ryanpeikoTestHand);
 isHand(testhand, testdora);
