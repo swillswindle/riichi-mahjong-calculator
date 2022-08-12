@@ -41,7 +41,6 @@ function isHand(hand, dora) {
   scoringHelper.countDora(currentHand, dora);
   //sort tiles by index from low to high
   currentHand.tiles.sort((a, b) => a - b);
-  // TODO: sort tile by value from low to high
 
   //quick checks for unusual hands
   if (scoringHelper.isOrphans(currentHand) && !openHand) {

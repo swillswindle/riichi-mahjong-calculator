@@ -168,7 +168,6 @@ module.exports = {
         console.log(remainingTiles);
         if (currentHand.pairCount === 1) {
           //if we already know the pair then we only have to look for pon/kan/chi
-          //idr exactly how kan works scoring wise but it might be prudent to see if we can do something with kans similar to how we dealt with the red fives.
         }
         if (currentHand.pairCount === 0) {
           //if we don't have a pair yet, the remaining tiles must contain a pair
@@ -400,6 +399,17 @@ module.exports = {
       if (unsortedCount === currentHand.tiles.filter((x) => x !== -1).length) {
         return 2;
       }
+    }
+  },
+  verifyKan(currentHand) {
+    if (currentHand.kanCount > 0) {
+      if (currentHand.tiles.length !== currentHand.kanCount + 14) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return true;
     }
   },
 };
